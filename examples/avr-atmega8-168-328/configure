@@ -1,0 +1,20 @@
+#!/bin/bash
+UART_LIB=uartlibrary.zip
+UART_SRC=uart.c
+UART_H=uart.h
+PF_URL=http://homepage.hispeed.ch/peterfleury
+
+echo "Prepare for build..."
+
+if [ ! -e $UART_SRC ]; then
+	if [ ! -e $UART_LIB ]; then
+		echo "Downloading Peter Fleury's UART library..."
+		wget $PF_URL/$UART_LIB
+	fi
+	echo "Extracting UART Library..."
+	unzip -j $UART_LIB $UART_SRC -d .
+	unzip -j $UART_LIB $UART_H -d .
+fi
+
+echo "Done!"
+
