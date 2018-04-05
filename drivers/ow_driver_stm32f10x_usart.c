@@ -31,10 +31,9 @@
 
 #include "stm32f10x.h"
 
-#define KR_KEY_Reload	 ((uint16_t)0xAAAA)
-#define KR_KEY_Enable	 ((uint16_t)0xCCCC)
-
 // USART1 uses faster clock (APB2) than USART2/3, hence the difference in constants
+// Adjusted to 72 MHz system core clock and APB2. APB1 - 36 MHz. Adjust for different
+// prescalers.
 #define U1_BAUD_9600	((uint16_t)0x1D4C)
 #define U1_BAUD_115200 ((uint16_t)0x0271)
 
@@ -250,7 +249,7 @@ int reset_wire(ow_driver_ptr d)
 	uint8_t ow_presence;
 	// Set 9600 baud for 480 µs reset pulse
 	d->USARTx->BRR = d->brr_9600;
-	d->USARTx->SR = ~( USART_SR_TC | USART_SR_RXNE);
+	d->USARTx->SR &= ~(USART_SR_TC | USART_SR_RXNE);
 	d->USARTx->DR = RESET_BYTE;
 	while(!(d->USARTx->SR & USART_SR_TC) && !(d->USARTx->SR & USART_SR_RXNE)) {
 		OW_YIELD;
@@ -268,7 +267,7 @@ int reset_wire(ow_driver_ptr d)
 
 int write_bit(ow_driver_ptr d, uint8_t bit)
 {
-	d->USARTx->SR = ~( USART_FLAG_TC | USART_FLAG_RXNE);
+	d->USARTx->SR &= ~(USART_FLAG_TC | USART_FLAG_RXNE);
 	d->USARTx->DR = ow_bits[bit];
 
 	while(!(d->USARTx->SR & USART_FLAG_TC) && !(d->USARTx->SR & USART_FLAG_RXNE)) {
@@ -282,7 +281,7 @@ int read_bit(ow_driver_ptr d, uint8_t *rbit)
 {
 	uint8_t bit;
 
-	d->USARTx->SR = ~( USART_FLAG_TC | USART_FLAG_RXNE);
+	d->USARTx->SR &= ~(USART_FLAG_TC | USART_FLAG_RXNE);
 	d->USARTx->DR = OW_R_1;
 	while(!(d->USARTx->SR & USART_FLAG_TC) && !(d->USARTx->SR & USART_FLAG_RXNE)) {
 		OW_YIELD;
@@ -298,7 +297,6 @@ int read_bit(ow_driver_ptr d, uint8_t *rbit)
 }
 
 #ifdef OW_MODE_USART_DMA
-extern char buf[100];
 int write_byte(ow_driver_ptr d, uint8_t byte)
 {
 	uint8_t i;
