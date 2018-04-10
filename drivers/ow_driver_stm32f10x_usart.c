@@ -267,10 +267,10 @@ int reset_wire(ow_driver_ptr d)
 
 int write_bit(ow_driver_ptr d, uint8_t bit)
 {
-	d->USARTx->SR &= ~(USART_FLAG_TC | USART_FLAG_RXNE);
+	d->USARTx->SR &= ~(USART_SR_TC | USART_SR_RXNE);
 	d->USARTx->DR = ow_bits[bit];
 
-	while(!(d->USARTx->SR & USART_FLAG_TC) && !(d->USARTx->SR & USART_FLAG_RXNE)) {
+	while(!(d->USARTx->SR & USART_SR_TC) && !(d->USARTx->SR & USART_SR_RXNE)) {
 		OW_YIELD;
 	}
 
@@ -281,9 +281,9 @@ int read_bit(ow_driver_ptr d, uint8_t *rbit)
 {
 	uint8_t bit;
 
-	d->USARTx->SR &= ~(USART_FLAG_TC | USART_FLAG_RXNE);
+	d->USARTx->SR &= ~(USART_SR_TC | USART_SR_RXNE);
 	d->USARTx->DR = OW_R_1;
-	while(!(d->USARTx->SR & USART_FLAG_TC) && !(d->USARTx->SR & USART_FLAG_RXNE)) {
+	while(!(d->USARTx->SR & USART_SR_TC) && !(d->USARTx->SR & USART_SR_RXNE)) {
 		OW_YIELD;
 	}
 	bit = (uint8_t)(d->USARTx->DR & (uint16_t)0x01FF);
