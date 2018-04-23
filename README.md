@@ -7,7 +7,7 @@ Targeted devices:
 - STM32F7xx (planned)
 - AVR: GPIO
 - Linux UART
-- ESP32 (planned)
+- ESP32: UART
 
 ## Why?
 
@@ -143,6 +143,10 @@ Fully compilable on Linux PC, when AVR GCC is installed. `Makefile` and `configu
 `main.c` is provided, however no `Makefile`. Please create your own using favourite toolchain and/or IDE.
 
 For dependencies check above mentioned pile of libraries.
+
+### ESP32 Example
+
+Run `./configure`, add Xtensa compile to your PATH, set IDF_PATH and type `make`.
 
 ### Linux Example
 

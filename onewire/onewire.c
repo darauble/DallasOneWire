@@ -24,8 +24,8 @@
  *  GNU General Public License for more details.
  */
 
-#include <onewire.h>
 #include <string.h>
+#include "onewire.h"
 
 #define CMD_SKIP   (uint8_t) 0xCC
 #define CMD_SEL    (uint8_t) 0x55

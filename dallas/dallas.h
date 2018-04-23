@@ -70,7 +70,7 @@ typedef enum {
 #define CMD_COPY_SCR 0x48
 
 #include <stdint.h>
-#include <onewire.h>
+#include "onewire.h"
 
 #if defined(__cplusplus)
 extern "C" {

@@ -26,8 +26,8 @@
  *  GNU General Public License for more details.
  */
 
-#ifndef OW_DRIVER_STM32_USART_H_
-#define OW_DRIVER_STM32_USART_H_
+#ifndef OW_DRIVER_STM32F10x_USART_H_
+#define OW_DRIVER_STM32F10x_USART_H_
 
 /* It is generally not a good idea to use malloc in embedded systems. So the library allocates
  * predefined size of static memory to put driver structures in. On STM32F103 type MCUs

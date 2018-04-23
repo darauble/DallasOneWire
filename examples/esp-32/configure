@@ -1,0 +1,23 @@
+#!/bin/bash
+COMP_DIR=../..
+LOCAL_COMP_DIR=components
+C_DRIVER=drivers
+C_DALLAS=dallas
+C_OW=onewire
+C_INC=include
+C_MK=component.mk
+
+for COMP in $C_DRIVER $C_DALLAS $C_OW; do
+	mkdir -p $LOCAL_COMP_DIR/$COMP/$C_INC
+	echo "# Empty mk file" > $LOCAL_COMP_DIR/$COMP/$C_MK
+done
+
+ln $COMP_DIR/$C_DALLAS/dallas.c $LOCAL_COMP_DIR/$C_DALLAS
+ln $COMP_DIR/$C_DALLAS/dallas.h $LOCAL_COMP_DIR/$C_DALLAS/$C_INC
+
+ln $COMP_DIR/$C_OW/onewire.c $LOCAL_COMP_DIR/$C_OW
+ln $COMP_DIR/$C_OW/onewire.h $LOCAL_COMP_DIR/$C_OW/$C_INC
+ln $COMP_DIR/$C_DRIVER/ow_driver_esp32_usart.c $LOCAL_COMP_DIR/$C_DRIVER
+ln $COMP_DIR/$C_DRIVER/ow_driver.h $LOCAL_COMP_DIR/$C_DRIVER/$C_INC
+ln $COMP_DIR/$C_DRIVER/ow_driver_esp32_usart.h $LOCAL_COMP_DIR/$C_DRIVER/$C_INC
+

@@ -86,6 +86,15 @@ decided to leave for some time.
 
 _So code review and contributions are more than welcome_
 
+### ESP32 UART Driver
+
+This driver is based on top of Espressif's IDF provided UART driver, designed especially for FreeRTOS with
+resource spinlocks and indirect memory-to-peripheral mapping. It is quite heavyweight, but ESP32 can
+handle it. As it is not my main priority, I will not put too much effort into implementing it as lightweight
+as possible. And there's no need to.
+
+ESP32 SDK provides `malloc` and `free`, so driver release routine is also implemented.
+
 ### Linux USB-UART
 
 Or, actually, any serial device, controlled by Linux kernel. It is a fun driver, as one can
