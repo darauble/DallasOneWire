@@ -25,6 +25,7 @@
  */
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <util/atomic.h>
 
 #include "ow_driver.h"
 #include "ow_driver_avr_gpio.h"
@@ -72,33 +73,33 @@ int reset_wire(ow_driver_ptr d)
 	DDR(*d->port) &= ~d->pin; // Input mode
 
 	// Backup interrupt register value and disable interrupts
-	uint8_t sreg = SREG;
-	cli();
-	// Wait while pin is high, just in case
-	do {
-		if (--retries == 0) {
-			return OW_ERR;
-		}
-		delay_us(2);
-	} while ((PIN(*d->port) & d->pin) == 0);
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+    {
+        // Wait while pin is high, just in case
+        do {
+            if (--retries == 0) {
+                return OW_ERR;
+            }
+            delay_us(2);
+        } while ((PIN(*d->port) & d->pin) == 0);
 
-	DDR(*d->port) |= d->pin;; // Output mode
-	*d->port &= ~d->pin; // Output low
+        DDR(*d->port) |= d->pin;; // Output mode
+        *d->port &= ~d->pin; // Output low
 
-	delay_us(480);
+        delay_us(480);
 
-	DDR(*d->port) &= ~d->pin; // Input mode
+        DDR(*d->port) &= ~d->pin; // Input mode
 
-	delay_us(70);
+        delay_us(70);
 
-	if ((PIN(*d->port) & d->pin) == 0) {
-		ow_presence = OW_OK;
-	} else {
-		ow_presence = OW_NOTHING;
-	}
+        if ((PIN(*d->port) & d->pin) == 0) {
+            ow_presence = OW_OK;
+        } else {
+            ow_presence = OW_NOTHING;
+        }
 
-	// Restore interrupt state to previous one
-	SREG = sreg;
+        // Restore interrupt state to previous one
+    }
 
 	delay_us(410);
 
@@ -119,15 +120,15 @@ int write_bit(ow_driver_ptr d, uint8_t bit)
 
 	DDR(*d->port) |= d->pin;; // Output mode
 
-	uint8_t sreg = SREG;
-	cli();
-	*d->port &= ~d->pin; // Output low
-	delay_us(d1);
-	*d->port |= d->pin; // Output high
-	delay_us(d2);
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+    {
+        *d->port &= ~d->pin; // Output low
+        delay_us(d1);
+        *d->port |= d->pin; // Output high
+        delay_us(d2);
 
-	DDR(*d->port) &= ~d->pin; // Input mode, leave floating on exit
-	SREG = sreg;
+        DDR(*d->port) &= ~d->pin; // Input mode, leave floating on exit
+    }
 
 	OW_YIELD;
 
@@ -138,23 +139,23 @@ int read_bit(ow_driver_ptr d, uint8_t *rbit)
 {
 	DDR(*d->port) |= d->pin;; // Output mode
 
-	uint8_t sreg = SREG;
-	cli();
-	*d->port &= ~d->pin; // Output low
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+    {
+        *d->port &= ~d->pin; // Output low
 
-	delay_us(3);
+        delay_us(3);
 
-	*d->port |= d->pin; // Output high
-	DDR(*d->port) &= ~d->pin; // Input mode
+        *d->port |= d->pin; // Output high
+        DDR(*d->port) &= ~d->pin; // Input mode
 
-	delay_us(10);
+        delay_us(10);
 
-	if ((PIN(*d->port) & d->pin) > 0) {
-		*rbit = 1;
-	} else {
-		*rbit = 0;
-	}
-	SREG = sreg;
+        if ((PIN(*d->port) & d->pin) > 0) {
+            *rbit = 1;
+        } else {
+            *rbit = 0;
+        }
+    }
 
 	delay_us(53);
 
