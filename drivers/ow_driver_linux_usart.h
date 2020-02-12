@@ -26,6 +26,8 @@
 #ifndef OW_DRIVER_LINUX_USART_H_
 #define OW_DRIVER_LINUX_USART_H_
 
+#include <ow_driver.h>
+
 /* Serial devices on linux are usually enumerated as /dev/ttyUSB0, /dev/ttyUSB1.
  * /dev/ttyACM0 are usually used for modems, but happens with USART chips too.
  * To init driver, provide a number of TTY device like that:
@@ -40,5 +42,6 @@ enum {
 
 #define PATH_LEN 16 // Should suffice for most of the paths
 
+int init_driver_linux_usart(ow_driver_ptr *driver, char *dev_path);
 
 #endif /* OW_DRIVER_LINUX_USART_H_ */

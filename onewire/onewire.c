@@ -55,18 +55,30 @@ int owu_read_byte(owu_struct_t *wire, uint8_t *byte)
 	return read_byte(wire->driver, byte);
 }
 
-void owu_skip(owu_struct_t *wire)
+int owu_skip(owu_struct_t *wire)
 {
-	write_byte(wire->driver, CMD_SKIP);
+	return write_byte(wire->driver, CMD_SKIP);
 }
 
-void owu_select_device(owu_struct_t *wire, const uint8_t *addr)
+int owu_select_device(owu_struct_t *wire, const uint8_t *addr)
 {
-	write_byte(wire->driver, CMD_SEL);
+	int wire_status;
+	
+	wire_status = write_byte(wire->driver, CMD_SEL);
+
+	if (wire_status != OW_OK) {
+		return wire_status;
+	}
+
 	uint8_t i;
 	for (i=0; i<8; i++) {
-		write_byte(wire->driver, *addr++);
+		wire_status = write_byte(wire->driver, *addr++);
+		if (wire_status != OW_OK) {
+			return wire_status;
+		}	
 	}
+
+	return OW_OK;
 }
 
 uint32_t owu_crc8(uint8_t* data, uint32_t len)
@@ -130,8 +142,17 @@ int owu_search(owu_struct_t *wire, uint8_t *addr)
 			do
 			{
 				// read a bit and its complement
-				read_bit(wire->driver, &id_bit);
-				read_bit(wire->driver, &cmp_id_bit);
+				int bit_status = read_bit(wire->driver, &id_bit);
+				
+				if (bit_status != OW_OK) {
+					return 0;
+				}
+
+				bit_status = read_bit(wire->driver, &cmp_id_bit);
+				
+				if (bit_status != OW_OK) {
+					return 0;
+				}
 
 				// check for no devices on 1-wire
 				if ((id_bit == 1) && (cmp_id_bit == 1)) {

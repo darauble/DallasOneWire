@@ -67,7 +67,7 @@ int owu_reset(owu_struct_t *);
  * Writes a byte to OneWire bus using defined mode.
  * @param owu_struct_t type initialized instance
  * @param a byte to be written to the bus
- * @return OW_OK, no check is implemented
+ * @return OW_OK if operation successful, error code otherwise
  */
 int owu_write_byte(owu_struct_t *, uint8_t);
 
@@ -82,16 +82,18 @@ int owu_read_byte(owu_struct_t *, uint8_t*);
 /**
  * Send skip ROM address check command
  * @param owu_struct_t type initialized instance
+ * @return OW_OK if operation successful, error code otherwise
  */
-void owu_skip(owu_struct_t *);
+int owu_skip(owu_struct_t *);
 
 /**
  * Selects particular device by address for further
  * commands.
  * @param owu_struct_t type initialized instance
  * @param address of the device
+ * @return OW_OK if operation successful, error code otherwise
  */
-void owu_select_device(owu_struct_t *, const uint8_t *);
+int owu_select_device(owu_struct_t *, const uint8_t *);
 
 /**
  * Calculate CRC8 for a given bytes of OneWire data

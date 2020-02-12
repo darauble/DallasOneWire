@@ -23,7 +23,6 @@
  *  GNU General Public License for more details.
  */
 
-#include <ow_driver.h>
 #include <ow_driver_linux_usart.h>
 
 #include <unistd.h>
@@ -33,6 +32,7 @@
 #include <termios.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #define RESET_BYTE (uint8_t)0xF0
 
@@ -52,8 +52,6 @@ static void set_baud(ow_driver_ptr, int);
 
 int init_driver(ow_driver_ptr *driver, int dev_id)
 {
-	*driver = (ow_driver_ptr)malloc(sizeof(struct one_wire_driver));
-
 	char dev_path[PATH_LEN];
 
 	if (dev_id < OW_TTY_ACM) {
@@ -64,6 +62,17 @@ int init_driver(ow_driver_ptr *driver, int dev_id)
 		snprintf(dev_path, PATH_LEN, TTY, "S", dev_id-OW_TTY_S);
 	} else if (dev_id >= OW_TTY_AMA) {
 		snprintf(dev_path, PATH_LEN, TTY, "AMA", dev_id-OW_TTY_AMA);
+	}
+
+	return init_driver_linux_usart(driver, dev_path);
+}
+
+int init_driver_linux_usart(ow_driver_ptr *driver, char *dev_path)
+{
+	*driver = (ow_driver_ptr)malloc(sizeof(struct one_wire_driver));
+
+	if (*driver == NULL) {
+		return OW_ERR;
 	}
 
 	(*driver)->fd = open(dev_path, O_RDWR | O_NOCTTY | O_NDELAY);
@@ -120,7 +129,24 @@ int write_bit(ow_driver_ptr d, uint8_t bit)
 	if (ret != 1) {
 		return OW_ERR;
 	}
-	while(!read(d->fd, &c, 1)); // Need to read and flush on write, as RX/TX are interconnected
+
+	ssize_t read_status;
+	struct timespec read_wait = { .tv_sec = 0, .tv_nsec = 5000000 };
+
+	// Need to read and flush on write, as RX/TX are interconnected
+	int i;
+	for (i = 0; i < 100; i++) {
+		read_status = read(d->fd, &c, 1);
+		if (read_status) {
+			break;
+		}
+		nanosleep(&read_wait, NULL);
+	}
+	
+	if (!read_status) {
+		printf("write_bit: could not read the bit, line interrupted?\n");
+		return OW_ERR;
+	}
 
 	return OW_OK;
 }
@@ -134,7 +160,23 @@ int read_bit(ow_driver_ptr d, uint8_t *rbit)
 	if (ret != 1) {
 		return OW_ERR;
 	}
-	while(!read(d->fd, &c, 1));
+
+	ssize_t read_status;
+	struct timespec read_wait = { .tv_sec = 0, .tv_nsec = 5000000 };
+
+	int i;
+	for (i = 0; i < 100; i++) {
+		read_status = read(d->fd, &c, 1);
+		if (read_status) {
+			break;
+		}
+		nanosleep(&read_wait, NULL);
+	}
+	
+	if (!read_status) {
+		printf("read_bit: could not read the bit, line interrupted?\n");
+		return OW_ERR;
+	}
 
 	if (c == OW_R_1) {
 		*rbit = 1;

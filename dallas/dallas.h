@@ -101,8 +101,9 @@ int ds_convert_device(owu_struct_t *wire, uint8_t *addr);
  * @param: OneWire describing and initialized strucutre
  * @param: 8 byte serial of the sensor
  * @param: a pointer to put read scratchpad to
+ * @return: OW_OK if read successful, error code otherwise
  */
-void ds_read_scratchpad(owu_struct_t *wire, uint8_t *addr, uint8_t *scratchpad);
+int ds_read_scratchpad(owu_struct_t *wire, uint8_t *addr, uint8_t *scratchpad);
 
 /**
  * Read only two bytes of the scratchpad were temperature bytes are located.
@@ -112,8 +113,9 @@ void ds_read_scratchpad(owu_struct_t *wire, uint8_t *addr, uint8_t *scratchpad);
  * @param: OneWire describing and initialized strucutre
  * @param: 8 byte serial of the sensor
  * @param: a pointer to put read scratchpad to
+ * @return: OW_OK if read successful, error code otherwise
  */
-void ds_read_temp_only(owu_struct_t *wire, uint8_t *addr, uint8_t *scratchpad);
+ int ds_read_temp_only(owu_struct_t *wire, uint8_t *addr, uint8_t *scratchpad);
 
 /**
  * Gets raw 12 bit representation of the temperature bytes. Used

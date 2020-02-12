@@ -38,34 +38,53 @@ int ds_convert_all(owu_struct_t *wire)
 
 int ds_convert_device(owu_struct_t *wire, uint8_t *addr)
 {
-	int presence;
-	presence = owu_reset(wire);
-	owu_select_device(wire, addr);
-	owu_write_byte(wire, CMD_START_CONV);
+	int wire_status;
 
-	return presence;
+	wire_status = owu_reset(wire);
+	if (wire_status != OW_OK) return wire_status;
+
+	wire_status = owu_select_device(wire, addr);
+	if (wire_status != OW_OK) return wire_status;
+
+	wire_status = owu_write_byte(wire, CMD_START_CONV);
+	if (wire_status != OW_OK) return wire_status;
+
+	return wire_status;
 }
 
-static void ds_read(owu_struct_t *wire, uint8_t *addr, uint8_t *scratchpad, int len)
+static int ds_read(owu_struct_t *wire, uint8_t *addr, uint8_t *scratchpad, int len)
 {
-	owu_reset(wire);
-	owu_select_device(wire, addr);
-	owu_write_byte(wire, CMD_READ_SCR);
+	int wire_status;
+
+	wire_status = owu_reset(wire);
+	if (wire_status != OW_OK) return wire_status;
+	
+	wire_status = owu_select_device(wire, addr);
+	if (wire_status != OW_OK) return wire_status;
+
+	wire_status = owu_write_byte(wire, CMD_READ_SCR);
+	if (wire_status != OW_OK) return wire_status;
 
 	uint8_t i;
+
 	for (i=0; i<len; i++) {
-		owu_read_byte(wire, &scratchpad[i]);
+		wire_status = owu_read_byte(wire, &scratchpad[i]);
+		if (wire_status != OW_OK) {
+			return wire_status;
+		}
 	}
+
+	return OW_OK;
 }
 
-void ds_read_scratchpad(owu_struct_t *wire, uint8_t *addr, uint8_t *scratchpad)
+int ds_read_scratchpad(owu_struct_t *wire, uint8_t *addr, uint8_t *scratchpad)
 {
-	ds_read(wire, addr, scratchpad, __SCR_LENGTH);
+	return ds_read(wire, addr, scratchpad, __SCR_LENGTH);
 }
 
-void ds_read_temp_only(owu_struct_t *wire, uint8_t *addr, uint8_t *scratchpad)
+int ds_read_temp_only(owu_struct_t *wire, uint8_t *addr, uint8_t *scratchpad)
 {
-	ds_read(wire, addr, scratchpad, 2);
+	return ds_read(wire, addr, scratchpad, 2);
 }
 
 int16_t ds_get_raw(uint8_t *scratchpad)
